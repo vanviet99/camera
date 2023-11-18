@@ -14,7 +14,7 @@ const ProductController = {
 
             }
             if (req.file) {
-                newData.image = req.file.buffer.toString('base64');
+                newData.image = req.file.path;
             }
             let data = await productModal.create(newData);
             res.status(200).json({ message: 'Thêm thành công', data: data });

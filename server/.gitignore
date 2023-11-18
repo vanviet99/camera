@@ -1,0 +1,4 @@
+# Tệp và thư mục không nên được theo dõi bởi Git
+node_modules/
+build/
+*.log

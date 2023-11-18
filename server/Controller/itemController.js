@@ -11,7 +11,7 @@ const itemController = {
             };
 
             if (req.file) {
-                newData.image = req.file.buffer.toString('base64');
+                newData.image = req.file.path;
             }
             const newItem = await itemModel.create(newData);
 

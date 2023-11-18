@@ -217,7 +217,7 @@ async function changePassword(req, res) {
         }
 
         if (req.file) {
-            updatedUserData.image = req.file.buffer.toString('base64');
+            updatedUserData.image = req.file.path;
         }
 
         const updatedUser = await user.findOneAndUpdate(
