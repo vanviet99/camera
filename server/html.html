@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Đăng ký</h2>
+        <form id="registerForm">
+            <label for="username">Tên người dùng:</label>
+            <input type="text" id="username" name="username" required>
+            
+            <label for="password">Mật khẩu:</label>
+            <input type="password" id="password" name="password" required>
+            
+            <label for="phone">Số điện thoại:</label>
+            <input type="text" id="phone" name="phone" required>
+
+            <label for="money">Số tiền:</label>
+            <input type="text" id="money" name="money" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="comment">Bình luận:</label>
+            <textarea id="comment" name="comment"></textarea>
+
+            <label for="avatar">Chọn ảnh đại diện:</label>
+            <input type="file" id="avatar" name="avatar" accept="image/*">
+            <img id="avatarPreview" alt="Ảnh đại diện" style="max-width: 100%; margin-top: 10px; display: none;">
+            
+            <button type="button" onclick="registerUser()">Đăng ký</button>
+        </form>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
