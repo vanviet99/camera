@@ -1,6 +1,6 @@
 const itemModel = require('../Modal/ItemModal')
 const productModel = require("../Modal/productModal")
-
+const path = require('path');
 const itemController = {
     addItem: async (req, res) => {
         try {
@@ -11,7 +11,9 @@ const itemController = {
             };
 
             if (req.file) {
-                newData.image = req.file.path;
+                const filePath = req.file.path;
+                const fileUrl = `http://localhost:${process.env.PORT}/uploads/${path.basename(filePath)}`;
+                newData.image = fileUrl;
             }
             const newItem = await itemModel.create(newData);
 

@@ -2,6 +2,7 @@ const nodemailer = require('nodemailer');
 const user = require('../Modal/userModal');
 const crypto = require('crypto');
 const bcrypt = require("bcrypt");
+const path = require('path');
 
 function generateAuthCode() {
     const code = Math.floor(100000 + Math.random() * 900000);
@@ -217,7 +218,9 @@ async function changePassword(req, res) {
         }
 
         if (req.file) {
-            updatedUserData.image = req.file.path;
+            const filePath = req.file.path;
+                const fileUrl = `http://localhost:${process.env.PORT}/uploads/${path.basename(filePath)}`;
+                updatedUserData.image = fileUrl;
         }
 
         const updatedUser = await user.findOneAndUpdate(

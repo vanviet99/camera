@@ -2,6 +2,8 @@ const productModal = require('../Modal/productModal')
 const categoryModel = require('../Modal/categoryModal')
 const removeDiacritics = require('remove-diacritics');
 const item = require('../Modal/ItemModal');
+const path = require('path');
+
 const ProductController = {
     addProduct: async (req, res) => {
         try {
@@ -14,7 +16,9 @@ const ProductController = {
 
             }
             if (req.file) {
-                newData.image = req.file.path;
+                const filePath = req.file.path;
+                const fileUrl = `http://localhost:${process.env.PORT}/uploads/${path.basename(filePath)}`;
+                newData.image = fileUrl;
             }
             let data = await productModal.create(newData);
             res.status(200).json({ message: 'Thêm thành công', data: data });
