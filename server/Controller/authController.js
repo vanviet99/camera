@@ -1,17 +1,18 @@
 const userModal = require("../Modal/userModal");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
+const path = require("path")
 require("dotenv").config();
 
 const authController = {
     registerUser: async (req, res) => {
+        console.log(req.body);
         try {
             const checkUsername = await userModal.find({
                 username: req.body.username,
             });
             const checkEmail = await userModal.find({
-                username: req.body.email,
+                email: req.body.email,
             });
             if (checkEmail.length !== 0) {
                 return res.status(401).json({ message: "Email đã tồn tại" });
