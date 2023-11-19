@@ -26,8 +26,8 @@ const userSchema = mongoose.Schema({
     default: Date.now
   },
   role: {
-    type: Boolean,
-    default: false
+    type: String,
+    default: '1'
   },
   email: {
     type: String,

@@ -127,7 +127,7 @@ const authController = {
             );
             res
                 .status(200)
-                .json({ message: "Đăng nhập thành công", data: token });
+                .json({ message: "Đăng nhập thành công", data: token,role:username.role });
         } catch (error) {
             res.status(500).json({ message: "Lỗi đăng nhập", error });
         }

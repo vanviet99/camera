@@ -24,7 +24,7 @@ const middlewreController = {
 },
 
     verifyAdmin: (req, res, next) => {
-        if (req.user.role) {
+        if (req.user.role === '2') {
             next()
         } else {
             res.status(403).json("Bạn không được cấp quyền admin")
