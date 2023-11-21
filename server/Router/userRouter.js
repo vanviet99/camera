@@ -7,7 +7,7 @@ const {upload} = require('../upload.config');
 router.post('/sencode', password.sendAuthCode);
 router.post('/changepassword',password.changePassword)
 router.patch('/updateser',middlewreController.verifyToken,upload.single('file'),password.updateUser)
-
+router.post('/rate',middlewreController.verifyToken,password.rateUserProduct)
 module.exports = router;
 
 

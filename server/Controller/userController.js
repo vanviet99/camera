@@ -3,42 +3,44 @@ const user = require('../Modal/userModal');
 const crypto = require('crypto');
 const bcrypt = require("bcrypt");
 const path = require('path');
-
+const product = require("../Modal/productModal");
+const { create } = require('domain');
+const productModel = require('../Modal/productModal');
 function generateAuthCode() {
-    const code = Math.floor(100000 + Math.random() * 900000);
-    return code.toString();
+  const code = Math.floor(100000 + Math.random() * 900000);
+  return code.toString();
 }
 async function sendAuthCode(req, res) {
-    try {
-        const { email } = req.body;
-        const code = generateAuthCode();
+  try {
+    const { email } = req.body;
+    const code = generateAuthCode();
 
-        const updateResult = await user.updateOne({ email: email }, { code: code });
-        const userDocument = await user.findOne({ email: email });
-        if (updateResult.modifiedCount === 1 && userDocument) {
-            const transporter = nodemailer.createTransport({
-                service: 'Gmail',
-                //   auth: {
-                //     user: 'nguyenvietnc99@gmail.com',
-                //     pass: 'yqsbcrwwdvvtôijrrtôi'
-                //   }
-                auth: {
-                    user: 'mon01092003@gmail.com',
-                    pass: 'lhrbzxysxpbmqxob'
-                }
-            });
-            const date = new Date()
-            const day = date.getDate();
-            const month = date.getMonth() + 1;
-            const year = date.getFullYear();
+    const updateResult = await user.updateOne({ email: email }, { code: code });
+    const userDocument = await user.findOne({ email: email });
+    if (updateResult.modifiedCount === 1 && userDocument) {
+      const transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        //   auth: {
+        //     user: 'nguyenvietnc99@gmail.com',
+        //     pass: 'yqsbcrwwdvvtôijrrtôi'
+        //   }
+        auth: {
+          user: 'mon01092003@gmail.com',
+          pass: 'lhrbzxysxpbmqxob'
+        }
+      });
+      const date = new Date()
+      const day = date.getDate();
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
 
-            const formattedDate = `${day}/${month}/${year}`;
+      const formattedDate = `${day}/${month}/${year}`;
 
-            const mailOptions = {
-                from: 'mon01092003@gmail.com',
-                to: email,
-                subject: 'Mã xác thực',
-                html: `<!DOCTYPE html>
+      const mailOptions = {
+        from: 'mon01092003@gmail.com',
+        to: email,
+        subject: 'Mã xác thực',
+        html: `<!DOCTYPE html>
           <html lang="en">
             <head>
               <meta charset="UTF-8" />
@@ -158,93 +160,124 @@ async function sendAuthCode(req, res) {
             </body>
           </html>
           `
-            };
+      };
 
-            const sendMailResult = await transporter.sendMail(mailOptions);
+      const sendMailResult = await transporter.sendMail(mailOptions);
 
-            if (sendMailResult.accepted.length > 0) {
-                res.status(200).json(`Email sent: ${code}`);
-            } else {
-                throw new Error('Failed to send email');
-            }
-        } else {
-            let message = updateResult.modifiedCount === 1 ? 'Email không chính xác' : 'Email không tồn tại';
-            res.status(401).json(message);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json('Internal Server Error');
-    }
-}
-
-
-async function changePassword(req, res) {
-    const { username, code, newPassword } = req.body;
-  
-    try {
-      const userPassword = await user.findOne({ $or: [{ username: username }, { email: username }], code: code });
-        if (user) {
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
-        userPassword.password = hashedPassword;
-        userPassword.code = null; 
-        await userPassword.save();
-        res.status(200).json({ message: 'Đổi mật khẩu thành công' });
+      if (sendMailResult.accepted.length > 0) {
+        res.status(200).json(`Email sent: ${code}`);
       } else {
-        res.status(401).json({ error: 'Thông tin người dùng hoặc mã code không chính xác' });
+        throw new Error('Failed to send email');
       }
-    } catch (error) {
-      res.status(500).json({ error: 'Lỗi khi truy vấn cơ sở dữ liệu' });
+    } else {
+      let message = updateResult.modifiedCount === 1 ? 'Email không chính xác' : 'Email không tồn tại';
+      res.status(401).json(message);
     }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json('Internal Server Error');
   }
+}
+async function changePassword(req, res) {
+  const { username, code, newPassword } = req.body;
 
-  async function updateUser(req, res) {
-    try {
-        const existingUsername = await user.findOne({ username: req.body.username });
-
-        if (existingUsername) {
-            return res.status(200).json({ message: "Username đã tồn tại" });
-        }
-
-        const updatedUserData = {
-            username: req.body.username,
-            phone: req.body.phone,
-        };
-
-        if (req.body.password) {
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(req.body.password, salt);
-            updatedUserData.password = hashedPassword;
-        }
-
-        if (req.file) {
-            const filePath = req.file.path;
-                const fileUrl = `http://localhost:${process.env.PORT}/uploads/${path.basename(filePath)}`;
-                updatedUserData.image = fileUrl;
-        }
-
-        const updatedUser = await user.findOneAndUpdate(
-            { _id: req.user.userId },
-            updatedUserData,
-            { new: true }
-        );
-
-        if (!updatedUser) {
-            console.error(`User not found with ID: ${req.user.userId}`);
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        const data = await user.findOne({ _id: req.user.userId });
-        res.status(200).json({ message: "Cập nhật thông tin người dùng thành công", data: data });
-
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error: 'Lỗi khi cập nhật thông tin người dùng' });
+  try {
+    const userPassword = await user.findOne({ $or: [{ username: username }, { email: username }], code: code });
+    if (user) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+      userPassword.password = hashedPassword;
+      userPassword.code = null;
+      await userPassword.save();
+      res.status(200).json({ message: 'Đổi mật khẩu thành công' });
+    } else {
+      res.status(401).json({ error: 'Thông tin người dùng hoặc mã code không chính xác' });
     }
+  } catch (error) {
+    res.status(500).json({ error: 'Lỗi khi truy vấn cơ sở dữ liệu' });
+  }
+}
+
+async function updateUser(req, res) {
+  try {
+    const existingUsername = await user.findOne({ username: req.body.username });
+
+    if (existingUsername) {
+      return res.status(200).json({ message: "Username đã tồn tại" });
+    }
+
+    const updatedUserData = {
+      username: req.body.username,
+      phone: req.body.phone,
+    };
+
+    if (req.body.password) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(req.body.password, salt);
+      updatedUserData.password = hashedPassword;
+    }
+
+    if (req.file) {
+      const filePath = req.file.path;
+      const fileUrl = `http://localhost:${process.env.PORT}/uploads/${path.basename(filePath)}`;
+      updatedUserData.image = fileUrl;
+    }
+
+    const updatedUser = await user.findOneAndUpdate(
+      { _id: req.user.userId },
+      updatedUserData,
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      console.error(`User not found with ID: ${req.user.userId}`);
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const data = await user.findOne({ _id: req.user.userId });
+    res.status(200).json({ message: "Cập nhật thông tin người dùng thành công", data: data });
+
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Lỗi khi cập nhật thông tin người dùng' });
+  }
+}
+async function rateUserProduct(req, res) {
+  try {
+    const productId = req.body.productId;
+    const userRating = req.body.rating;
+
+    const productOne = await productModel.findOne({ _id: productId });
+
+    if (!productOne) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    const existingRating = productOne.Rate.find(rate => rate.userId === req.user.userId);
+
+    if (existingRating) {
+      existingRating.rating = userRating;
+    } else {
+      productOne.Rate.push({
+        userId: req.user.userId,
+        rating: userRating
+      });
+    }
+
+    await productOne.save();
+
+    res.status(200).json({
+      message: 'Success',
+      data: productOne
+    });
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
 }
 
 
 
 
 
-module.exports = { sendAuthCode, changePassword ,updateUser};
+
+module.exports = { sendAuthCode, changePassword, updateUser, rateUserProduct };

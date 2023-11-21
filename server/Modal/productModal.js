@@ -58,6 +58,22 @@ const productSchema = mongoose.Schema({
     type: String,
     ref: 'category',
     required: true
+  },
+  Rate: {
+    type: [
+      {
+        userId: {
+          type: String,
+          ref: 'user'
+        },
+        rating: {
+          type: Number,
+          min: 1,
+          max: 5
+        }
+      }
+    ],
+    default: []
   }
 }, { collection: 'product' });
 

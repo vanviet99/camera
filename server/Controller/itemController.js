@@ -5,9 +5,9 @@ const itemController = {
     addItem: async (req, res) => {
         try {
             const newData = {
-                name: req.body.name,
-                description: req.body.description,
-                price: req.body.price,
+                // name: req.body.name,
+                // description: req.body.description,
+                // price: req.body.price,
             };
 
             if (req.file) {

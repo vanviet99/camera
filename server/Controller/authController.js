@@ -29,8 +29,7 @@ const authController = {
                 password: password,
                 phone: req.body.phone,
                 money: req.body.money,
-                role: false,
-                email:req.body.email,
+                email: req.body.email,
             };
             let newUser = await userModal.create(newUserData);
             const userdata = await userModal.findById(newUser._id);
@@ -127,7 +126,12 @@ const authController = {
             );
             res
                 .status(200)
-                .json({ message: "Đăng nhập thành công", data: token,role:username.role });
+                .json({
+                    message: "Đăng nhập thành công", data: {
+                        ...token,
+                        user
+                    },
+                });
         } catch (error) {
             res.status(500).json({ message: "Lỗi đăng nhập", error });
         }
@@ -139,9 +143,9 @@ const authController = {
         if (!user) {
             return res.status(403).json({ message: 'Chưa đăng nhập' });
         }
-      
+
         try {
-      
+
             jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
             const token = authController.generateToken({
                 userId: user._id,
@@ -164,7 +168,7 @@ const authController = {
             res.status(403).json({ message: 'Xác thực refreshToken thất bại', error });
         }
     },
-    
+
     logout: async (req, res) => {
         try {
             const data = await userModal.updateOne(
@@ -177,7 +181,7 @@ const authController = {
             res.status(500).json({ message: error });
         }
     }
-    
+
 
 };
 

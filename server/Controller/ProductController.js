@@ -106,7 +106,7 @@ const ProductController = {
             });
         }
     },
-    loadItemData :async(itemIds)=>{
+    loadItemData: async (itemIds) => {
         const itemDataArray = [];
 
         for (let i = 0; i < itemIds.length; i++) {
@@ -114,7 +114,7 @@ const ProductController = {
             const itemData = await item.findOne({ _id: itemId }).lean();
             itemDataArray.push(itemData);
         }
-    
+
         return itemDataArray;
     },
     getOneProduct: async (req, res) => {
@@ -122,14 +122,14 @@ const ProductController = {
             const productId = req.params.productId;
             const data = await productModal.findOne({ _id: productId })
                 .populate('Comment.userId')
-                .populate('itemProductId') 
+                .populate('itemProductId')
                 .lean();
-    
             if (!data) {
                 return res.status(404).json({ message: 'Product not found' });
             }
-    
-            
+            const totalRating = data.Rate.length;
+            const averageRating =
+                data.Rate.length > 0 ? totalRating / data.Rate.length : 0;
             const commentsWithUsername = data.Comment.map(comment => {
                 return {
                     userId: comment.userId ? comment.userId._id : null,
@@ -139,15 +139,14 @@ const ProductController = {
                     _id: comment._id
                 };
             });
-    
             const itemDataArray = await ProductController.loadItemData(data.itemProductId);
             const items = itemDataArray.map(item => {
                 return {
                     _id: item._id,
                     name: item.name,
                     price: item.price,
-                    image:item.image,
-                    description:item.description
+                    image: item.image,
+                    description: item.description
                 };
             });
             const productData = {
@@ -160,17 +159,20 @@ const ProductController = {
                 created_at: data.created_at,
                 itemProductId: items,
                 categoryId: data.categoryId,
-                Comment: commentsWithUsername
+                Comment: commentsWithUsername,
+                Rate: {
+                    total: totalRating,
+                    average: averageRating,
+                    details: data.Rate,
+                },
             };
-    
+
             res.status(200).json(productData);
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Internal server error' });
         }
-    }
-    
-
+    },
 }
 
 
