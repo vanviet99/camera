@@ -127,7 +127,8 @@ const ProductController = {
             if (!data) {
                 return res.status(404).json({ message: 'Product not found' });
             }
-            const totalRating = data.Rate.length;
+            const totalRating = data.Rate.reduce((acc, rating) => acc + rating.rating, 0);
+            const toalRate = data.Rate.length
             const averageRating =
                 data.Rate.length > 0 ? totalRating / data.Rate.length : 0;
             const commentsWithUsername = data.Comment.map(comment => {
@@ -161,7 +162,7 @@ const ProductController = {
                 categoryId: data.categoryId,
                 Comment: commentsWithUsername,
                 Rate: {
-                    total: totalRating,
+                    total: toalRate,
                     average: averageRating,
                     details: data.Rate,
                 },
